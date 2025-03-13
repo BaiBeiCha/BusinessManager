@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  users-db:
+    image: postgres:12
+    environment:
+      POSTGRES_DB: users
+      POSTGRES_USER: users
+      POSTGRES_PASSWORD: users
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U urls -d urls"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "5431:5431"
+    networks:
+      - bm-network
+
+  discovery-service:
+    build: ./ServiceDiscovery
+    ports:
+      - ":"
+
+  user-management-service:
+    build: ./UserManagementService
+    ports:
+      - "8001:8001"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://users-db:5431/users
+      SPRING_DATASOURCE_USERNAME: users
+      SPRING_DATASOURCE_PASSWORD: users
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    depends_on:
+      urls-db:
+        condition: service_healthy
+    networks:
+      - bm-network
+
+networks:
+  bm-network:
+    driver: bridge
