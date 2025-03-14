@@ -1,9 +1,13 @@
 package com.baibei.authservice.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-public class RegisterForm {
+@AllArgsConstructor
+@NoArgsConstructor
+public class RegisterRequest {
 
     private String username;
     private String email;

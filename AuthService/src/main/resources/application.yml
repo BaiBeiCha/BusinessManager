@@ -2,7 +2,25 @@ spring:
   application:
     name: Auth Service
 
+  datasource:
+    url: jdbc:postgresql://auth-db:5432/auth
+    username: auth
+    password: auth
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+server:
+  port: 8081
+
 eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka
+
+jwt:
+  refreshTokenDurationMs: 604800000
+  jwtExpirationMs: 3600000
+  secret: 54a19165ab392a3af32c673d429bf861e62e8428827f5df9638e6d52f5601030937aa7387c917ba8a423209b079e2fef3296fd18c59617576fba8bdb8ee972f73e222ea0067b05a66f5b7e5ede85c533196319b7ee9081f740880b797390169184cf7d0e158154b64d0ee58f0a2f7fa361ffb1964c5d453cdd8b28f0a5a59888189d8e978c241d17c549918c41523650ef27055bd96174cb99839c684c9cd7defa84411469305d1847f2fe1bac78dc37233bcc5912ea4df690fa0a725c01d76c2c266abc574146504f7126ca0c48d60d72ecaed9299128cb75313397c64b2459e822205473c100ce58a75508323dd54d6b84b052e20913766b04505b0246ea89

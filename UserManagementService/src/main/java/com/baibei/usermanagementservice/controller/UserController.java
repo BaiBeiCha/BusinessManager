@@ -29,7 +29,11 @@ public class UserController {
         user.setUsername(userAuthDto.getUsername());
         user.setPassword(userAuthDto.getPassword());
         user.setEmail(userAuthDto.getEmail());
-        user.setRoles(getRoles());
+        if (userAuthDto.getRoles() != null) {
+            user.setRoles(userAuthDto.getRoles());
+        } else {
+            user.setRoles(getRoles());
+        }
 
         userService.save(user);
 
@@ -73,9 +77,9 @@ public class UserController {
         return userAuthDto;
     }
 
-    @PatchMapping("/username/auth")
-    public UserAuthDto updateUser(@RequestBody UserAuthDto userAuthDto) {
-        User user = userService.findByUsername(userAuthDto.getUsername());
+    @PatchMapping("/{username}/auth")
+    public UserAuthDto updateUser(@RequestBody UserAuthDto userAuthDto, @PathVariable String username) {
+        User user = userService.findByUsername(username);
         if (existsBy(userAuthDto.getUsername(), userAuthDto.getEmail())) {
             user = new User();
         }
@@ -97,7 +101,7 @@ public class UserController {
         }
     }
 
-    @GetMapping("/{username}/enable")
+    @PostMapping("/{username}/enable")
     public Boolean enableUser(@PathVariable(value = "username") String username) {
         User user = userService.findByUsername(username);
 
