@@ -62,6 +62,7 @@ public class AuthController {
             return ResponseEntity.ok(new AuthResponse(accessToken, refreshToken.getToken()));
 
         } catch (AuthenticationException e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
@@ -96,7 +97,6 @@ public class AuthController {
 
         return refreshTokenService.findByToken(requestRefreshToken)
                 .map(token -> {
-                    // Проверка, не истёк ли refresh токен
                     boolean isValid = refreshTokenService.verifyExpiration(token);
 
                     if (!isValid) {
@@ -104,11 +104,8 @@ public class AuthController {
                     }
 
                     String username = token.getUsername();
-                    // Генерация нового Access Token
                     String newAccessToken = jwtUtil.generateToken(username, null);
 
-                    // Можно вернуть новый Refresh Token, если делаешь ротацию
-                    // Для простоты оставляем старый
                     return ResponseEntity.ok(new AuthResponse(newAccessToken, requestRefreshToken));
                 })
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body("Refresh token not found"));

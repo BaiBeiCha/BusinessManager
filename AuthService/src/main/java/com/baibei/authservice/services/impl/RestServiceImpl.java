@@ -1,5 +1,6 @@
 package com.baibei.authservice.services.impl;
 
+import com.baibei.authservice.dto.UserDto;
 import com.baibei.authservice.entity.User;
 import com.baibei.authservice.services.RestService;
 import lombok.RequiredArgsConstructor;
@@ -15,13 +16,18 @@ public class RestServiceImpl implements RestService {
     @Override
     public User getUser(String username) {
         String url = "http://UserManagementService/api/users/{username}/auth";
-        return restTemplate.getForObject(url, User.class, username);
+        UserDto result = restTemplate.getForObject(url, UserDto.class, username);
+        if (result == null) {
+            return null;
+        } else {
+            return result.toUser();
+        }
     }
 
     @Override
     public boolean registerUser(User user) {
         String url = "http://UserManagementService/api/users/register";
-        var result = restTemplate.postForObject(url, user, User.class);
+        var result = restTemplate.postForObject(url, user.toDto(), UserDto.class);
         return result != null;
     }
 
@@ -34,7 +40,7 @@ public class RestServiceImpl implements RestService {
     @Override
     public boolean updateUser(User user) {
         String url = "http://UserManagementService/api/users/{username}/auth";
-        var result = restTemplate.patchForObject(url, user, User.class, user.getUsername());
+        var result = restTemplate.patchForObject(url, user.toDto(), UserDto.class, user.getUsername());
         return result != null;
     }
 
@@ -48,5 +54,10 @@ public class RestServiceImpl implements RestService {
     public void deleteUser(String username) {
         String url = "http://UserManagementService/api/users/{username}";
         restTemplate.delete(url, username);
+    }
+
+    @Override
+    public void deleteUser(User user) {
+        deleteUser(user.getUsername());
     }
 }

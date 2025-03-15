@@ -2,6 +2,8 @@ package com.baibei.usermanagementservice.service;
 
 import com.baibei.usermanagementservice.entity.User;
 
+import java.util.List;
+
 public interface UserService {
 
     User save(User user);
@@ -10,4 +12,5 @@ public interface UserService {
     boolean existsByEmail(String email);
     boolean existsByUsername(String username);
 
+    List<User> findAll();
 }

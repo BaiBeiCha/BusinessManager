@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @RequiredArgsConstructor
@@ -18,6 +19,11 @@ public class UserController {
 
     private final UserService userService;
     private final RoleService roleService;
+
+    @GetMapping
+    public List<User> getAllUsers() {
+        return userService.findAll();
+    }
 
     @PostMapping("/register")
     public UserAuthDto register(@RequestBody UserAuthDto userAuthDto) {
@@ -29,31 +35,43 @@ public class UserController {
         user.setUsername(userAuthDto.getUsername());
         user.setPassword(userAuthDto.getPassword());
         user.setEmail(userAuthDto.getEmail());
-        if (userAuthDto.getRoles() != null) {
-            user.setRoles(userAuthDto.getRoles());
-        } else {
-            user.setRoles(getRoles());
-        }
+        user.setRoles(getRolesFromRequest(userAuthDto));
 
+        user.getRoles().forEach(roleService::save);
         userService.save(user);
 
         return userAuthDto;
     }
 
+    private Set<Role> getRolesFromRequest(UserAuthDto userAuthDto) {
+        Set<Role> roles = new HashSet<>();
+        if (userAuthDto.getRoles() != null) {
+            for (String role : userAuthDto.getRoles()) {
+                roles.add(getRoleByName(role));
+            }
+        } else {
+            roles = getRoles();
+        }
+        return roles;
+    }
+
     private Set<Role> getRoles() {
         Set<Role> roles = new HashSet<>();
-        Role user;
-
-        if (roleService.existsByRoleName("ROLE_USER")) {
-            user = roleService.findByRoleName("ROLE_USER");
-        } else {
-            user = new Role();
-            user.setName("ROLE_USER");
-            roleService.save(user);
-        }
-
+        Role user = getRoleByName("ROLE_USER");
         roles.add(user);
         return roles;
+    }
+
+    private Role getRoleByName(String name) {
+        Role role;
+        if (roleService.existsByRoleName(name)) {
+            role = roleService.findByRoleName(name);
+        } else {
+            role = new Role();
+            role.setName(name);
+            roleService.save(role);
+        }
+        return role;
     }
 
     @GetMapping("/exists")
@@ -68,13 +86,19 @@ public class UserController {
     }
 
     @GetMapping("/{username}/auth")
-    public UserAuthDto findAuthByUsername(@PathVariable(value = "username") String username) {
+    public UserAuthDto findAuthByUsername(@PathVariable String username) {
         User user = userService.findByUsername(username);
-        UserAuthDto userAuthDto = new UserAuthDto();
-        userAuthDto.setUsername(user.getUsername());
-        userAuthDto.setPassword(user.getPassword());
-        userAuthDto.setEmail(user.getEmail());
-        return userAuthDto;
+        UserAuthDto dto = new UserAuthDto();
+        dto.setUsername(user.getUsername());
+        dto.setPassword(user.getPassword());
+        dto.setEmail(user.getEmail());
+        dto.setRoles(
+                user.getRoles().stream()
+                        .map(Role::getName)
+                        .toArray(String[]::new)
+        );
+
+        return dto;
     }
 
     @PatchMapping("/{username}/auth")

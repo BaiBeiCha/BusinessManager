@@ -1,8 +1,11 @@
 spring:
   application:
-    name: API Gateway
+    name: APIGateway
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: http://discovery-service:8761/eureka
+
+server:
+  port: 8000

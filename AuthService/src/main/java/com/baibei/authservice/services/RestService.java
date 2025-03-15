@@ -14,4 +14,6 @@ public interface RestService {
     boolean enableUser(String username);
 
     void deleteUser(String username);
+
+    void deleteUser(User user);
 }
